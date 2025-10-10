@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Biblioteca Escolar - Administrador</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #f0f4f8;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .btn-back {
+            padding: 10px 20px;
+            background: #6b7280;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        /* Admin Interface */
+        .admin-layout {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 20px;
+            height: 680px;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-header {
+            background: white;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 2px solid #f0f4f8;
+        }
+
+        .form-header h2 {
+            color: #2563eb;
+            font-size: 18px;
+        }
+
+        .form-content {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+            font-size: 13px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 13px;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 12px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .btn-primary:hover {
+            background: #1e40af;
+        }
+
+        .btn-secondary {
+            width: 100%;
+            padding: 10px;
+            background: #6b7280;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 13px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        .list-header {
+            background: #2563eb;
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .list-header h2 {
+            font-size: 18px;
+        }
+
+        .counter {
+            font-size: 13px;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+        }
+
+        .search-bar {
+            padding: 15px 20px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .search-bar input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 13px;
+        }
+
+        .btn-search {
+            padding: 10px 20px;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .table-container {
+            flex: 1;
+            overflow: auto;
+            padding: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f3f4f6;
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+            border-bottom: 2px solid #e5e7eb;
+            position: sticky;
+            top: 0;
+            font-size: 13px;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 13px;
+        }
+
+        tr:hover {
+            background: #f9fafb;
+            cursor: pointer;
+        }
+
+        .action-buttons {
+            padding: 15px 20px;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-action {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 12px;
+            color: white;
+        }
+
+        .btn-edit {
+            background: #f59e0b;
+        }
+
+        .btn-delete {
+            background: #ef4444;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .message {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+
+        .tr__book.seleccionado {
+            background-color: #89b6f1;
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Interfaz Administrador -->
+    <div id="pantallaAdmin" class="main-container">
+        <button class="btn-back" onclick="volverInicio()">← Volver</button>
+
+        <!-- Mensajes de estado -->
+        <div id="messageContainer"></div>
+
+        <div class="admin-layout">
+            <!-- Panel Izquierdo: Formulario -->
+            <div class="panel">
+                <div class="form-header">
+                    <h2>📖 Añadir/Editar Libro</h2>
+                </div>
+                <div class="form-content">
+                    <!-- FORMULARIO TRADICIONAL CON ACTION Y METHOD -->
+                    <form action="/admin" method="post" id="formsLibro">
+                        <input type="hidden" name="id_libro" id="id_libro">
+                        <div class="form-group">
+                            <label>Título:</label>
+                            <input type="text" name="titulo" id="titulo" placeholder="Título del libro" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Autor:</label>
+                            <input type="text" name="autor" id="autor" placeholder="Autor" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Género:</label>
+                            <select name="genero" id="genero" required>
+                                <option value="">Selecciona un género</option>
+                                <option value="Ficción">Ficción</option>
+                                <option value="No Ficción">No Ficción</option>
+                                <option value="Ciencia Ficción">Ciencia Ficción</option>
+                                <option value="Fantasía">Fantasía</option>
+                                <option value="Misterio">Misterio</option>
+                                <option value="Romance">Romance</option>
+                                <option value="Terror">Terror</option>
+                                <option value="Biografía">Biografía</option>
+                                <option value="Historia">Historia</option>
+                                <option value="Poesía">Poesía</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Año:</label>
+                            <input type="number" name="anio_publicacion" id="ano" placeholder="Año de publicación" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Descripción:</label>
+                            <textarea name="descripcion" id="descripcion" placeholder="Descripción del libro..."></textarea>
+                        </div>
+                        <button type="submit" id='btn__guardar' class="btn-primary">💾 Agregar libro</button>
+                        <button type="button" id="btn__limpiar" class="btn-secondary">🔄 Limpiar</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Panel Derecho: Lista -->
+            <div class="panel">
+                <div class="list-header">
+                    <h2>📚 Catálogo de Libros</h2>
+                    <div class="counter" id="contadorAdmin">0 libros</div>
+                </div>
+                <div class="search-bar">
+                    <form action="/admin" method="get" style="width: 100%; display: flex; gap: 10px; align-items: center;">
+                        <span>🔍 Buscar:</span>
+                        <input type="text" id="buscarAdmin" placeholder="Buscar por título o autor..." name="q" value="{{query}}">
+                        <button type="submit"  class="btn-search">Buscar</button>               
+                    </form>
+                </div>
+                <div class="table-container">
+                    <table id = "tablaLibros">
+                        <thead>
+                            <tr>
+                                <th>Título</th>
+                                <th>Autor</th>
+                                <th>Género</th>
+                                <th>Año</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaAdmin">
+                            {% for item in values %}
+                            <tr id = "fila{{ item.id }}" class ="tr__book" data-id ="{{ item.id }}" data-titulo="{{ item.titulo }}" data-autor="{{ item.autor }}" data-genero="{{ item.genero }}" data-anio="{{ item.anio_publicacion }}" data-descripcion="{{ item.descripcion }}">
+                                <td>{{ item.titulo }}</td>
+                                <td>{{ item.autor }}</td>
+                                <td>{{ item.genero }}</td>
+                                <td>{{ item.anio_publicacion }}</td>
+                            </tr>
+                                {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="action-buttons">
+                    <button id="btn__editar" class="btn-action btn-edit">✏️ Editar</button>
+                    <button class="btn-action btn-delete" id="btn__eliminar">🗑️ Eliminar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        const idInput = document.getElementById('id_libro');
+        const titulo = document.getElementById('titulo');
+        const autor = document.getElementById('autor');
+        const genero = document.getElementById('genero');
+        const ano = document.getElementById('ano');
+        const descripcion = document.getElementById('descripcion');
+        const filas = document.querySelectorAll("#tablaLibros tbody tr");
+        const btnEditar = document.getElementById('btn__editar');
+        const btnEliminar = document.getElementById('btn__eliminar');
+        const btnGuardar = document.getElementById('btn__guardar');
+        const btnLimpiar = document.getElementById('btn__limpiar');
+        const formsLibro = document.getElementById('formsLibro');
+        const contadorAdmin = document.getElementById('contadorAdmin');
+
+        let filaSeleccionada = null;
+
+         filas.forEach(fila => {
+            fila.addEventListener('click', () => {
+                // Quita selección previa
+                filas.forEach(tr => tr.classList.remove("seleccionado"));
+
+                // Marca la fila actual
+                fila.classList.add("seleccionado");
+
+                // Guarda el id del libro seleccionado
+                filaSeleccionada = fila
+                console.log("Libro seleccionado ID:", filaSeleccionada.dataset.id);
+                
+            });
+        });
+
+        btnEliminar.addEventListener('click', () => {
+            if (filaSeleccionada) {
+                if (confirm("¿Seguro que deseas eliminar este libro?")) {
+                    window.location.href = "admin/eliminar/" + filaSeleccionada.dataset.id;
+                }
+            } else {
+                mostrarMensaje("Por favor selecciona un libro para eliminar.", "error");
+            }
+        });
+
+        btnEditar.addEventListener('click', () => {
+            if (filaSeleccionada) {
+                // Rellena el formulario con los datos del libro seleccionado
+                idInput.value = filaSeleccionada.dataset.id;
+                titulo.value = filaSeleccionada.dataset.titulo;
+                autor.value = filaSeleccionada.dataset.autor;
+                genero.value = filaSeleccionada.dataset.genero;
+                ano.value = filaSeleccionada.dataset.anio;
+                descripcion.value = filaSeleccionada.dataset.descripcion;
+
+                // Cambia el texto del botón
+                document.querySelector('.btn-primary').textContent = "💾 Guardar cambios";
+                btnLimpiar.textContent = "❌ Cancelar edición";
+                console.log(idInput.value);
+            } else {
+                mostrarMensaje("Por favor selecciona un libro para editar.", "error");
+            }
+        });
+
+        btnLimpiar.addEventListener('click', () => {
+            formsLibro.reset();
+            idInput.value = '';
+            console.log("filaSeleccionada:", filaSeleccionada);
+            filaSeleccionada.classList.remove("seleccionado");
+            filaSeleccionada = null;
+            btnLimpiar.textContent = "🔄 Limpiar";
+            document.querySelector('.btn-primary').textContent = "💾 Agregar libro";
+        });
+
+        function volverInicio() {
+            window.location.href = '/';
+        }
+
+        function mostrarMensaje(mensaje, tipo) {
+            const container = document.getElementById('messageContainer');
+            container.innerHTML = `<div class="message ${tipo}">${mensaje}</div>`;
+            setTimeout(() => {
+                container.innerHTML = '';
+            }, 5000);
+        }
+
+        function actualizarContador() {
+            let visibles = 0;
+            filas.forEach(fila => {
+                if (fila.style.display !== "none") visibles++;
+            });
+            contadorAdmin.textContent = visibles + " libros";
+        }
+
+        actualizarContador();
+
+        
+    </script>
+</body>
+</html>

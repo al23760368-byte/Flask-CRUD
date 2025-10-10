@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Biblioteca Escolar - Alumno</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #f0f4f8;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .btn-back {
+            padding: 10px 20px;
+            background: #6b7280;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 680px;
+        }
+
+        .list-header {
+            background: #10b981;
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .list-header h2 {
+            font-size: 18px;
+        }
+
+        .counter {
+            font-size: 13px;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+        }
+
+        .search-bar {
+            padding: 15px 20px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .search-bar input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 13px;
+        }
+
+        .btn-search {
+            padding: 10px 20px;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .table-container {
+            flex: 1;
+            overflow: auto;
+            padding: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f3f4f6;
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+            border-bottom: 2px solid #e5e7eb;
+            position: sticky;
+            top: 0;
+            font-size: 13px;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 13px;
+        }
+
+        tr:hover {
+            background: #f9fafb;
+            cursor: pointer;
+        }
+
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-leido {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-no-leido {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .hint {
+            padding: 12px 20px;
+            background: #eff6ff;
+            color: #1e40af;
+            text-align: center;
+            font-size: 13px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 3% auto;
+            padding: 35px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 550px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2563eb;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .modal-info {
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .modal-label {
+            font-weight: bold;
+            min-width: 120px;
+            color: #4b5563;
+        }
+
+        .modal-value {
+            color: #1f2937;
+        }
+
+        .stars-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f9fafb;
+            border-radius: 8px;
+        }
+
+        .stars-container {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .star {
+            font-size: 28px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            user-select: none;
+        }
+
+        .star:hover {
+            transform: scale(1.2);
+        }
+
+        .star.active {
+            color: #fbbf24;
+        }
+
+        .star.inactive {
+            color: #d1d5db;
+        }
+
+        .estado-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f9fafb;
+            border-radius: 8px;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+        }
+
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .modal-description {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f9fafb;
+            border-radius: 8px;
+            line-height: 1.6;
+            color: #374151;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+
+        .modal-buttons {
+            margin-top: 25px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-save {
+            flex: 1;
+            padding: 12px;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-close {
+            padding: 12px 30px;
+            background: #6b7280;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #6b7280;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Interfaz Alumno -->
+    <div id="pantallaAlumno" class="main-container">
+        <button class="btn-back" onclick="volverInicio()">← Volver</button>
+        <div class="panel">
+            <div class="list-header">
+                <h2 id="tituloAlumno">📚 Biblioteca Escolar - Juan Pérez</h2>
+                <div class="counter" id="contadorAlumno">Cargando...</div>
+            </div>
+            <div class="search-bar">
+                <span>🔍 Buscar:</span>
+                <input type="text" id="buscarAlumno" placeholder="Buscar..." onkeyup="buscarAlumno()">
+                <button class="btn-search" onclick="buscarAlumno()">Buscar</button>
+            </div>
+            <div class="table-container">
+                <div id="loadingMessage" class="loading">Cargando libros...</div>
+                <table id="tablaLibros">
+                    <thead>
+                        <tr>
+                            <th>Título</th>
+                            <th>Autor</th>
+                            <th>Género</th>
+                            <th>Año</th>
+                            <th>Mi Estado</th>
+                            <th>Mi ⭐</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaAlumno">
+                    </tbody>
+                </table>
+            </div>
+            <div class="hint">
+                💡 Haz clic en cualquier libro para ver detalles y agregar tu valoración
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Detalles Libro (Alumno) -->
+    <div id="modalDetalles" class="modal">
+        <div class="modal-content">
+            <div class="modal-header" id="modalTitulo">📖 Cargando...</div>
+            
+            <div class="modal-info">
+                <span class="modal-label">📝 Autor:</span>
+                <span class="modal-value" id="modalAutor">Cargando...</span>
+            </div>
+            <div class="modal-info">
+                <span class="modal-label">📚 Género:</span>
+                <span class="modal-value" id="modalGenero">Cargando...</span>
+            </div>
+            <div class="modal-info">
+                <span class="modal-label">📅 Año:</span>
+                <span class="modal-value" id="modalAño">Cargando...</span>
+            </div>
+
+            <div class="estado-section">
+                <div class="modal-label">📖 Estado de Lectura:</div>
+                <div class="radio-group">
+                    <label>
+                        <input type="radio" name="estado" value="Leído"> ✅ Leído
+                    </label>
+                    <label>
+                        <input type="radio" name="estado" value="No Leído" checked> 📚 No Leído
+                    </label>
+                </div>
+            </div>
+
+            <div class="stars-section">
+                <div class="modal-label">⭐ Mi Valoración:</div>
+                <div class="stars-container" id="starsContainer">
+                    <span class="star inactive" onclick="setValoracion(1)">⭐</span>
+                    <span class="star inactive" onclick="setValoracion(2)">⭐</span>
+                    <span class="star inactive" onclick="setValoracion(3)">⭐</span>
+                    <span class="star inactive" onclick="setValoracion(4)">⭐</span>
+                    <span class="star inactive" onclick="setValoracion(5)">⭐</span>
+                </div>
+            </div>
+
+            <div class="modal-description">
+                <strong>📄 Descripción:</strong><br><br>
+                <span id="modalDescripcion">Cargando...</span>
+            </div>
+
+            <div class="modal-buttons">
+                <button class="btn-save" onclick="guardarValoracion()">💾 Guardar</button>
+                <button class="btn-close" onclick="cerrarModal()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let libros = [];
+        let librosFiltrados = [];
+        let libroSeleccionado = null;
+        let valoracionActual = 0;
+
+        // Cargar libros al iniciar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            cargarLibros();
+        });
+
+        // Función para cargar libros desde el servidor
+        async function cargarLibros() {
+            try {
+                document.getElementById('loadingMessage').style.display = 'block';
+                document.getElementById('tablaLibros').style.display = 'none';
+                
+                // Simulamos una llamada a la API
+                // En un caso real, aquí harías una petición fetch a tu backend
+                const response = await fetch('/api/libros');
+                libros = await response.json();
+                
+                // En caso de que no tengas el backend listo, puedes usar datos de ejemplo
+                if (!response.ok) {
+                    throw new Error('Error al cargar libros');
+                }
+                
+                mostrarLibros();
+            } catch (error) {
+                console.error('Error al cargar libros:', error);
+                // Datos de ejemplo en caso de error
+                libros = [
+                    {
+                        id: 1,
+                        titulo: "Cien años de soledad", 
+                        autor: "Gabriel García Márquez", 
+                        genero: "Ficción", 
+                        año: "1967", 
+                        descripcion: "Una obra maestra del realismo mágico que narra la historia de la familia Buendía a lo largo de varias generaciones en el pueblo ficticio de Macondo.",
+                        estado: "Leído",
+                        valoracion: 5
+                    },
+                    {
+                        id: 2,
+                        titulo: "1984", 
+                        autor: "George Orwell", 
+                        genero: "Ciencia Ficción", 
+                        año: "1949", 
+                        descripcion: "Distopía sobre vigilancia totalitaria que explora temas de control gubernamental y pérdida de la libertad individual.",
+                        estado: "No Leído",
+                        valoracion: 0
+                    },
+                    {
+                        id: 3,
+                        titulo: "Don Quijote", 
+                        autor: "Miguel de Cervantes", 
+                        genero: "Ficción", 
+                        año: "1605", 
+                        descripcion: "La obra cumbre de la literatura española que sigue las aventuras de un hidalgo que enloquece leyendo libros de caballerías.",
+                        estado: "Leído",
+                        valoracion: 4
+                    }
+                ];
+                mostrarLibros();
+            }
+        }
+
+        // Mostrar libros en la tabla
+        function mostrarLibros() {
+            const tabla = document.getElementById('tablaAlumno');
+            const contador = document.getElementById('contadorAlumno');
+            const loadingMessage = document.getElementById('loadingMessage');
+            const tablaLibros = document.getElementById('tablaLibros');
+            
+            // Ocultar mensaje de carga y mostrar tabla
+            loadingMessage.style.display = 'none';
+            tablaLibros.style.display = 'table';
+            
+            // Actualizar contador
+            contador.textContent = `${libros.length} libro${libros.length !== 1 ? 's' : ''}`;
+            
+            // Limpiar tabla
+            tabla.innerHTML = '';
+            
+            // Llenar tabla con libros
+            librosFiltrados = [...libros]; // Copia para filtrado
+            
+            librosFiltrados.forEach((libro, index) => {
+                const fila = document.createElement('tr');
+                fila.onclick = () => verDetallesLibro(libro.id);
+                
+                // Crear estrellas para la valoración
+                let estrellasHTML = '';
+                if (libro.valoracion > 0) {
+                    for (let i = 1; i <= 5; i++) {
+                        estrellasHTML += i <= libro.valoracion ? '⭐' : '☆';
+                    }
+                } else {
+                    estrellasHTML = 'Sin valorar';
+                }
+                
+                fila.innerHTML = `
+                    <td>${libro.titulo}</td>
+                    <td>${libro.autor}</td>
+                    <td>${libro.genero}</td>
+                    <td>${libro.año}</td>
+                    <td><span class="status-badge ${libro.estado === 'Leído' ? 'status-leido' : 'status-no-leido'}">${libro.estado === 'Leído' ? '✅ Leído' : '📚 No Leído'}</span></td>
+                    <td>${estrellasHTML}</td>
+                `;
+                
+                tabla.appendChild(fila);
+            });
+        }
+
+        function volverInicio() {
+            alert('Volver al inicio');
+        }
+
+        function buscarAlumno() {
+            const termino = document.getElementById('buscarAlumno').value.toLowerCase();
+            
+            if (termino === '') {
+                librosFiltrados = [...libros];
+            } else {
+                librosFiltrados = libros.filter(libro => 
+                    libro.titulo.toLowerCase().includes(termino) ||
+                    libro.autor.toLowerCase().includes(termino) ||
+                    libro.genero.toLowerCase().includes(termino)
+                );
+            }
+            
+            mostrarLibros();
+        }
+
+        function verDetallesLibro(id) {
+            const libro = libros.find(l => l.id === id);
+            if (!libro) return;
+            
+            libroSeleccionado = id;
+            
+            document.getElementById('modalTitulo').textContent = '📖 ' + libro.titulo;
+            document.getElementById('modalAutor').textContent = libro.autor;
+            document.getElementById('modalGenero').textContent = libro.genero;
+            document.getElementById('modalAño').textContent = libro.año;
+            document.getElementById('modalDescripcion').textContent = libro.descripcion;
+            
+            valoracionActual = libro.valoracion || 0;
+            actualizarEstrellas(valoracionActual);
+            
+            const radioLeido = document.querySelector('input[name="estado"][value="Leído"]');
+            const radioNoLeido = document.querySelector('input[name="estado"][value="No Leído"]');
+            
+            if (libro.estado === "Leído") {
+                radioLeido.checked = true;
+            } else {
+                radioNoLeido.checked = true;
+            }
+            
+            document.getElementById('modalDetalles').style.display = 'block';
+        }
+
+        function setValoracion(valor) {
+            valoracionActual = valor;
+            actualizarEstrellas(valor);
+        }
+
+        function actualizarEstrellas(valor) {
+            const stars = document.querySelectorAll('#starsContainer .star');
+            stars.forEach((star, index) => {
+                if (index < valor) {
+                    star.classList.add('active');
+                    star.classList.remove('inactive');
+                } else {
+                    star.classList.add('inactive');
+                    star.classList.remove('active');
+                }
+            });
+        }
+
+        async function guardarValoracion() {
+            if (libroSeleccionado !== null) {
+                const estadoSeleccionado = document.querySelector('input[name="estado"]:checked').value;
+                
+                // Actualizar en memoria
+                const libroIndex = libros.findIndex(l => l.id === libroSeleccionado);
+                if (libroIndex !== -1) {
+                    libros[libroIndex].estado = estadoSeleccionado;
+                    libros[libroIndex].valoracion = valoracionActual;
+                    
+                    // En un caso real, aquí enviarías los datos al servidor
+                    try {
+                        const response = await fetch(`/api/libros/${libroSeleccionado}/valoracion`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                estado: estadoSeleccionado,
+                                valoracion: valoracionActual
+                            })
+                        });
+                        
+                        if (response.ok) {
+                            alert('✅ Valoración guardada correctamente');
+                        } else {
+                            throw new Error('Error al guardar valoración');
+                        }
+                    } catch (error) {
+                        console.error('Error al guardar valoración:', error);
+                        alert('✅ Valoración guardada localmente');
+                    }
+                    
+                    cerrarModal();
+                    mostrarLibros(); // Actualizar la tabla
+                }
+            }
+        }
+
+        function cerrarModal() {
+            document.getElementById('modalDetalles').style.display = 'none';
+        }
+
+        // Recargar libros cada 30 segundos para ver cambios del administrador
+        setInterval(cargarLibros, 30000);
+    </script>
+</body>
+</html>

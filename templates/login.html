@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Biblioteca Escolar</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 50px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+
+        h1 {
+            color: #2563eb;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #6b7280;
+            font-size: 16px;
+            margin-bottom: 50px;
+        }
+
+        .btn-main {
+            width: 100%;
+            padding: 25px;
+            margin: 15px 0;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn-main:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-admin {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-alumno {
+            background: #10b981;
+            color: white;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Pantalla de Selección -->
+    <div id="pantallaSeleccion" class="container">
+        <h1>📚 Biblioteca Escolar</h1>
+        <p class="subtitle">Sistema de Gestión de Libros</p>
+        
+        <button class="btn-main btn-admin" onclick="mostrarAdmin()">
+            👨‍💼 Administrador
+        </button>
+        
+        <button class="btn-main btn-alumno" onclick="mostrarAlumno()">
+            🎓 Alumno
+        </button>
+    </div>
+
+    <script>
+        function mostrarAdmin() {
+            document.getElementById('pantallaSeleccion').classList.add('hidden');
+            // Aquí iría la lógica para mostrar la interfaz de administrador
+            alert('Interfaz de Administrador');
+        }
+
+        function mostrarAlumno() {
+            document.getElementById('pantallaSeleccion').classList.add('hidden');
+            // Aquí iría la lógica para mostrar la interfaz de alumno
+            alert('Interfaz de Alumno');
+        }
+
+        function volverInicio() {
+            document.getElementById('pantallaSeleccion').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+{% for item in values %}
+    <p>{{ item.titulo }}</p>
+{% endfor %}
+
+<form method="POST" id="formLibro">
+        <input type="hidden" name="id_libro" id="id_libro">
+        <input type="text" name="titulo" id="titulo" placeholder="Título" required>
+        <input type="text" name="autor" id="autor" placeholder="Autor" required>
+        <button type="submit" id="btnGuardar">Guardar</button>
+        <button type="button" id="btnCancelar" style="display:none;">Cancelar</button>
+    </form>
