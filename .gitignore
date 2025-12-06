@@ -1,0 +1,147 @@
+# Entorno virtual
+venv/
+env/
+ENV/
+virtualenv/
+.env
+.venv
+env.bak/
+venv.bak/
+venv*/
+.venv*/
+
+# Variables de entorno
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.flaskenv
+
+# Archivos de configuración sensible
+config.py
+instance/
+config_*.py
+secrets.py
+
+# Archivos de Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Cache de pip
+pip-wheel-metadata/
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Archivos de desarrollo
+*.log
+logs/
+*.sqlite
+*.db
+*.sqlite3
+instance/*.db
+*.pid
+
+# SQLAlchemy / Base de datos
+# (excluye archivos de base de datos local, pero incluye scripts de migración)
+*.db
+*.sqlite
+*.sqlite3
+app.db
+dev.db
+test.db
+!migrations/
+
+# Migraciones (excluye el contenido pero mantiene el directorio)
+migrations/versions/*.py
+!migrations/versions/__init__.py
+
+# Archivos de IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Archivos estáticos compilados
+static/css/*.css
+static/js/*.js
+!static/css/*.min.css
+!static/js/*.min.js
+
+# Archivos de uploads/media
+uploads/
+media/
+temp/
+tmp/
+
+# Archivos de sistema operativo
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+
+# Archivos de sesión y cache de Flask
+.flask_session/
+
+# Certificados SSL
+*.key
+*.pem
+*.crt
+
+# Docker (opcional si usas Docker)
+docker-compose.override.yml
+
+# Documentación
+docs/_build/
+
+# Archivos de backup
+*.bak
+*.backup
+
+# Archivos de markdown temporal
+*.md~
