@@ -49,7 +49,7 @@
         }
 
         .list-header {
-            background: #10b981;
+            background: #2563eb;
             color: white;
             padding: 20px;
             display: flex;
@@ -300,6 +300,39 @@
         .hidden {
             display: none;
         }
+
+        /* Notificación */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 6px;
+            z-index: 10000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            font-weight: 500;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .notification.success {
+            background: #10b981;
+            color: white;
+        }
+
+        .notification.error {
+            background: #ef4444;
+            color: white;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
     </style>
 </head>
 <body>
@@ -308,8 +341,8 @@
         <button class="btn-back" onclick="volverInicio()">← Volver</button>
         <div class="panel">
             <div class="list-header">
-                <h2 id="tituloAlumno">📚 Biblioteca Escolar - Juan Pérez</h2>
-                <div class="counter" id="contadorAlumno">Cargando...</div>
+                <h2 id="tituloAlumno">📚 Biblioteca Escolar - {{ session['usuario'] }}</h2>
+                <div class="counter" id="contadorAlumno">{{ values|length }} libros</div>
             </div>
             <div class="search-bar">
                 <span>🔍 Buscar:</span>
@@ -317,7 +350,7 @@
                 <button class="btn-search" onclick="buscarAlumno()">Buscar</button>
             </div>
             <div class="table-container">
-                <div id="loadingMessage" class="loading">Cargando libros...</div>
+                <div id="loadingMessage" class="loading hidden">Cargando libros...</div>
                 <table id="tablaLibros">
                     <thead>
                         <tr>
@@ -330,8 +363,38 @@
                         </tr>
                     </thead>
                     <tbody id="tablaAlumno">
+                        {% for item in values %}
+                        <tr class="libro-fila" 
+                            data-id="{{ item.id }}" 
+                            data-titulo="{{ item.titulo }}" 
+                            data-autor="{{ item.autor }}" 
+                            data-genero="{{ item.genero }}" 
+                            data-anio="{{ item.anio_publicacion }}" 
+                            data-descripcion="{{ item.descripcion }}"
+                            onclick="abrirDetallesLibro({ item_id })">
+                            <td>{{ item.titulo }}</td>
+                            <td>{{ item.autor }}</td>
+                            <td>{{ item.genero }}</td>
+                            <td>{{ item.anio_publicacion }}</td>
+                            <td>
+                                <span class="status-badge status-no-leido" id="estado-{{ item.id }}">
+                                    📚 No Leído
+                                </span>
+                            </td>
+                            <td id="valoracion-{{ item.id }}">
+                                <span style="color: #999; font-size: 12px;">Sin valorar</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
+                {% if values|length == 0 %}
+                <div style="text-align: center; padding: 40px; color: #666;">
+                    <div style="font-size: 48px; margin-bottom: 20px;">📚</div>
+                    <h3 style="margin-bottom: 10px;">La biblioteca está vacía</h3>
+                    <p>Agrega libros desde el panel de administración</p>
+                </div>
+                {% endif %}
             </div>
             <div class="hint">
                 💡 Haz clic en cualquier libro para ver detalles y agregar tu valoración
@@ -361,10 +424,10 @@
                 <div class="modal-label">📖 Estado de Lectura:</div>
                 <div class="radio-group">
                     <label>
-                        <input type="radio" name="estado" value="Leído"> ✅ Leído
+                        <input type="radio" name="estado" value="Leído" id="radioLeido"> ✅ Leído
                     </label>
                     <label>
-                        <input type="radio" name="estado" value="No Leído" checked> 📚 No Leído
+                        <input type="radio" name="estado" value="No Leído" id="radioNoLeido" checked> 📚 No Leído
                     </label>
                 </div>
             </div>
@@ -386,236 +449,307 @@
             </div>
 
             <div class="modal-buttons">
-                <button class="btn-save" onclick="guardarValoracion()">💾 Guardar</button>
+                <button class="btn-save" onclick="guardarValoracion()">💾 Guardar Valoración</button>
                 <button class="btn-close" onclick="cerrarModal()">Cerrar</button>
             </div>
         </div>
     </div>
 
     <script>
-        let libros = [];
-        let librosFiltrados = [];
-        let libroSeleccionado = null;
-        let valoracionActual = 0;
+        // Variables globales
+    let libroSeleccionado = null;
+    let valoracionActual = 0;
+    let reseñasUsuario = {};
 
-        // Cargar libros al iniciar la página
-        document.addEventListener('DOMContentLoaded', function() {
-            cargarLibros();
-        });
+    // Inicializar cuando el DOM esté listo
+    document.addEventListener('DOMContentLoaded', function() {
+        cargarReseñasUsuario();
+        configurarEventListeners();
+    });
 
-        // Función para cargar libros desde el servidor
-        async function cargarLibros() {
-            try {
-                document.getElementById('loadingMessage').style.display = 'block';
-                document.getElementById('tablaLibros').style.display = 'none';
-                
-                // Simulamos una llamada a la API
-                // En un caso real, aquí harías una petición fetch a tu backend
-                const response = await fetch('/api/libros');
-                libros = await response.json();
-                
-                // En caso de que no tengas el backend listo, puedes usar datos de ejemplo
-                if (!response.ok) {
-                    throw new Error('Error al cargar libros');
-                }
-                
-                mostrarLibros();
-            } catch (error) {
-                console.error('Error al cargar libros:', error);
-                // Datos de ejemplo en caso de error
-                libros = [
-                    {
-                        id: 1,
-                        titulo: "Cien años de soledad", 
-                        autor: "Gabriel García Márquez", 
-                        genero: "Ficción", 
-                        año: "1967", 
-                        descripcion: "Una obra maestra del realismo mágico que narra la historia de la familia Buendía a lo largo de varias generaciones en el pueblo ficticio de Macondo.",
-                        estado: "Leído",
-                        valoracion: 5
-                    },
-                    {
-                        id: 2,
-                        titulo: "1984", 
-                        autor: "George Orwell", 
-                        genero: "Ciencia Ficción", 
-                        año: "1949", 
-                        descripcion: "Distopía sobre vigilancia totalitaria que explora temas de control gubernamental y pérdida de la libertad individual.",
-                        estado: "No Leído",
-                        valoracion: 0
-                    },
-                    {
-                        id: 3,
-                        titulo: "Don Quijote", 
-                        autor: "Miguel de Cervantes", 
-                        genero: "Ficción", 
-                        año: "1605", 
-                        descripcion: "La obra cumbre de la literatura española que sigue las aventuras de un hidalgo que enloquece leyendo libros de caballerías.",
-                        estado: "Leído",
-                        valoracion: 4
-                    }
-                ];
-                mostrarLibros();
+    // Función para cargar las reseñas del usuario
+    async function cargarReseñasUsuario() {
+        try {
+            const response = await fetch('/api/reseñas-usuario');
+            if (response.ok) {
+                reseñasUsuario = await response.json();
+                actualizarTablaConReseñas();
             }
+        } catch (error) {
+            console.error('Error cargando reseñas:', error);
         }
+    }
 
-        // Mostrar libros en la tabla
-        function mostrarLibros() {
-            const tabla = document.getElementById('tablaAlumno');
-            const contador = document.getElementById('contadorAlumno');
-            const loadingMessage = document.getElementById('loadingMessage');
-            const tablaLibros = document.getElementById('tablaLibros');
+    // Actualizar la tabla con las reseñas existentes
+    function actualizarTablaConReseñas() {
+        Object.keys(reseñasUsuario).forEach(libroId => {
+            const reseña = reseñasUsuario[libroId];
             
-            // Ocultar mensaje de carga y mostrar tabla
-            loadingMessage.style.display = 'none';
-            tablaLibros.style.display = 'table';
+            // Actualizar estado (Leído/No Leído)
+            const estadoElement = document.querySelector(`tr[data-id="${libroId}"] .status-badge`);
+            if (estadoElement) {
+                estadoElement.textContent = reseña.leido ? '✅ Leído' : '📚 No Leído';
+                estadoElement.className = `status-badge ${reseña.leido ? 'status-leido' : 'status-no-leido'}`;
+            }
             
-            // Actualizar contador
-            contador.textContent = `${libros.length} libro${libros.length !== 1 ? 's' : ''}`;
-            
-            // Limpiar tabla
-            tabla.innerHTML = '';
-            
-            // Llenar tabla con libros
-            librosFiltrados = [...libros]; // Copia para filtrado
-            
-            librosFiltrados.forEach((libro, index) => {
-                const fila = document.createElement('tr');
-                fila.onclick = () => verDetallesLibro(libro.id);
-                
-                // Crear estrellas para la valoración
+            // Actualizar valoración (estrellas)
+            const valoracionElement = document.querySelector(`tr[data-id="${libroId}"] td:nth-child(6)`);
+            if (valoracionElement && reseña.calificacion > 0) {
                 let estrellasHTML = '';
-                if (libro.valoracion > 0) {
-                    for (let i = 1; i <= 5; i++) {
-                        estrellasHTML += i <= libro.valoracion ? '⭐' : '☆';
-                    }
-                } else {
-                    estrellasHTML = 'Sin valorar';
+                for (let i = 1; i <= 5; i++) {
+                    estrellasHTML += i <= reseña.calificacion ? '⭐' : '☆';
                 }
-                
-                fila.innerHTML = `
-                    <td>${libro.titulo}</td>
-                    <td>${libro.autor}</td>
-                    <td>${libro.genero}</td>
-                    <td>${libro.año}</td>
-                    <td><span class="status-badge ${libro.estado === 'Leído' ? 'status-leido' : 'status-no-leido'}">${libro.estado === 'Leído' ? '✅ Leído' : '📚 No Leído'}</span></td>
-                    <td>${estrellasHTML}</td>
-                `;
-                
-                tabla.appendChild(fila);
-            });
-        }
+                valoracionElement.innerHTML = estrellasHTML;
+            }
+        });
+    }
 
-        function volverInicio() {
-            alert('Volver al inicio');
-        }
-
-        function buscarAlumno() {
-            const termino = document.getElementById('buscarAlumno').value.toLowerCase();
+    // Abrir detalles del libro (cuando haces clic en una fila)
+    function abrirDetallesLibro(libroId) {
+        const fila = document.querySelector(`tr[data-id="${libroId}"]`);
+        if (!fila) return;
+        
+        libroSeleccionado = libroId;
+        
+        // Obtener datos del libro desde los atributos data-
+        const titulo = fila.dataset.titulo;
+        const autor = fila.dataset.autor;
+        const genero = fila.dataset.genero;
+        const año = fila.dataset.anio;
+        const descripcion = fila.dataset.descripcion;
+        
+        // Actualizar contenido del modal
+        document.getElementById('modalTitulo').textContent = '📖 ' + titulo;
+        document.getElementById('modalAutor').textContent = autor;
+        document.getElementById('modalGenero').textContent = genero;
+        document.getElementById('modalAño').textContent = año;
+        document.getElementById('modalDescripcion').textContent = descripcion;
+        
+        // Verificar si existe reseña previa
+        const reseña = reseñasUsuario[libroId];
+        
+        if (reseña) {
+            // Cargar estado existente
+            const radioLeido = document.getElementById('radioLeido');
+            const radioNoLeido = document.getElementById('radioNoLeido');
             
-            if (termino === '') {
-                librosFiltrados = [...libros];
-            } else {
-                librosFiltrados = libros.filter(libro => 
-                    libro.titulo.toLowerCase().includes(termino) ||
-                    libro.autor.toLowerCase().includes(termino) ||
-                    libro.genero.toLowerCase().includes(termino)
-                );
+            if (radioLeido && radioNoLeido) {
+                if (reseña.leido) {
+                    radioLeido.checked = true;
+                } else {
+                    radioNoLeido.checked = true;
+                }
             }
             
-            mostrarLibros();
+            // Cargar valoración existente
+            valoracionActual = reseña.calificacion || 0;
+        } else {
+            // Valores por defecto
+            const radioNoLeido = document.getElementById('radioNoLeido');
+            if (radioNoLeido) radioNoLeido.checked = true;
+            valoracionActual = 0;
         }
+        
+        // Actualizar estrellas
+        actualizarEstrellas(valoracionActual);
+        
+        // Mostrar modal
+        document.getElementById('modalDetalles').style.display = 'block';
+    }
 
-        function verDetallesLibro(id) {
-            const libro = libros.find(l => l.id === id);
-            if (!libro) return;
-            
-            libroSeleccionado = id;
-            
-            document.getElementById('modalTitulo').textContent = '📖 ' + libro.titulo;
-            document.getElementById('modalAutor').textContent = libro.autor;
-            document.getElementById('modalGenero').textContent = libro.genero;
-            document.getElementById('modalAño').textContent = libro.año;
-            document.getElementById('modalDescripcion').textContent = libro.descripcion;
-            
-            valoracionActual = libro.valoracion || 0;
-            actualizarEstrellas(valoracionActual);
-            
-            const radioLeido = document.querySelector('input[name="estado"][value="Leído"]');
-            const radioNoLeido = document.querySelector('input[name="estado"][value="No Leído"]');
-            
-            if (libro.estado === "Leído") {
-                radioLeido.checked = true;
+    // Funciones de valoración con estrellas
+    function setValoracion(valor) {
+        valoracionActual = valor;
+        actualizarEstrellas(valor);
+    }
+
+    function actualizarEstrellas(valor) {
+        const estrellas = document.querySelectorAll('#starsContainer .star');
+        estrellas.forEach((estrella, index) => {
+            if (index < valor) {
+                estrella.classList.add('active');
+                estrella.classList.remove('inactive');
             } else {
-                radioNoLeido.checked = true;
+                estrella.classList.add('inactive');
+                estrella.classList.remove('active');
             }
+        });
+    }
+
+    // Guardar valoración en el servidor
+    async function guardarValoracion() {
+        if (!libroSeleccionado) {
+            mostrarNotificacion('No hay libro seleccionado', 'error');
+            return;
+        }
+        
+        const estadoSeleccionado = document.querySelector('input[name="estado"]:checked');
+        if (!estadoSeleccionado) {
+            mostrarNotificacion('Selecciona un estado de lectura', 'error');
+            return;
+        }
+        
+        const estado = estadoSeleccionado.value;
+        const leido = estado === 'Leído';
+        
+        try {
+            const data = {
+                libro_id: libroSeleccionado,
+                calificacion: valoracionActual,
+                leido: leido
+            };
             
-            document.getElementById('modalDetalles').style.display = 'block';
+            const response = await fetch('/api/guardar-reseña', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
+            
+            const resultado = await response.json();
+            
+            if (response.ok) {
+                // Actualizar localmente
+                reseñasUsuario[libroSeleccionado] = {
+                    calificacion: valoracionActual,
+                    leido: leido
+                };
+                
+                // Actualizar la tabla visualmente
+                actualizarTablaConReseñas();
+                
+                mostrarNotificacion('✅ Valoración guardada correctamente', 'success');
+                cerrarModal();
+            } else {
+                mostrarNotificacion('❌ Error: ' + (resultado.error || 'Error al guardar'), 'error');
+            }
+        } catch (error) {
+            console.error('Error guardando reseña:', error);
+            mostrarNotificacion('❌ Error de conexión', 'error');
         }
+    }
 
-        function setValoracion(valor) {
-            valoracionActual = valor;
-            actualizarEstrellas(valor);
+    // Cerrar modal
+    function cerrarModal() {
+        document.getElementById('modalDetalles').style.display = 'none';
+    }
+
+    // Función de búsqueda (la que ya tenías)
+    function buscarAlumno() {
+        const termino = document.getElementById('buscarAlumno').value.toLowerCase();
+        const filas = document.querySelectorAll('.libro-fila');
+        
+        let contador = 0;
+        filas.forEach(fila => {
+            const titulo = fila.dataset.titulo.toLowerCase();
+            const autor = fila.dataset.autor.toLowerCase();
+            const genero = fila.dataset.genero.toLowerCase();
+            
+            if (titulo.includes(termino) || autor.includes(termino) || genero.includes(termino)) {
+                fila.style.display = '';
+                contador++;
+            } else {
+                fila.style.display = 'none';
+            }
+        });
+        
+        // Actualizar contador
+        const contadorElement = document.getElementById('contadorAlumno');
+        if (contadorElement) {
+            contadorElement.textContent = `${contador} libros`;
         }
+    }
 
-        function actualizarEstrellas(valor) {
-            const stars = document.querySelectorAll('#starsContainer .star');
-            stars.forEach((star, index) => {
-                if (index < valor) {
-                    star.classList.add('active');
-                    star.classList.remove('inactive');
-                } else {
-                    star.classList.add('inactive');
-                    star.classList.remove('active');
+    // Configurar event listeners
+    function configurarEventListeners() {
+        // Búsqueda con Enter
+        const busquedaInput = document.getElementById('buscarAlumno');
+        if (busquedaInput) {
+            busquedaInput.addEventListener('keyup', function(event) {
+                if (event.key === 'Enter') {
+                    buscarAlumno();
                 }
             });
         }
-
-        async function guardarValoracion() {
-            if (libroSeleccionado !== null) {
-                const estadoSeleccionado = document.querySelector('input[name="estado"]:checked').value;
-                
-                // Actualizar en memoria
-                const libroIndex = libros.findIndex(l => l.id === libroSeleccionado);
-                if (libroIndex !== -1) {
-                    libros[libroIndex].estado = estadoSeleccionado;
-                    libros[libroIndex].valoracion = valoracionActual;
-                    
-                    // En un caso real, aquí enviarías los datos al servidor
-                    try {
-                        const response = await fetch(`/api/libros/${libroSeleccionado}/valoracion`, {
-                            method: 'PUT',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                estado: estadoSeleccionado,
-                                valoracion: valoracionActual
-                            })
-                        });
-                        
-                        if (response.ok) {
-                            alert('✅ Valoración guardada correctamente');
-                        } else {
-                            throw new Error('Error al guardar valoración');
-                        }
-                    } catch (error) {
-                        console.error('Error al guardar valoración:', error);
-                        alert('✅ Valoración guardada localmente');
-                    }
-                    
+        
+        // Cerrar modal con Escape
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                cerrarModal();
+            }
+        });
+        
+        // Cerrar modal haciendo clic fuera
+        const modal = document.getElementById('modalDetalles');
+        if (modal) {
+            modal.addEventListener('click', function(event) {
+                if (event.target === this) {
                     cerrarModal();
-                    mostrarLibros(); // Actualizar la tabla
                 }
+            });
+        }
+        
+        // Hacer que las filas de la tabla sean clickeables
+        const filasLibros = document.querySelectorAll('.libro-fila');
+        filasLibros.forEach(fila => {
+            fila.addEventListener('click', function() {
+                const libroId = this.dataset.id;
+                abrirDetallesLibro(libroId);
+            });
+        });
+    }
+
+    // Mostrar notificaciones
+    function mostrarNotificacion(mensaje, tipo) {
+        // Crear elemento de notificación
+        const notificacion = document.createElement('div');
+        notificacion.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            background: ${tipo === 'success' ? '#10b981' : '#ef4444'};
+            color: white;
+            border-radius: 6px;
+            z-index: 10000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            font-weight: 500;
+            animation: slideIn 0.3s ease-out;
+        `;
+        
+        notificacion.textContent = mensaje;
+        document.body.appendChild(notificacion);
+        
+        // Remover después de 3 segundos
+        setTimeout(() => {
+            notificacion.style.animation = 'slideOut 0.3s ease-out';
+            setTimeout(() => notificacion.remove(), 300);
+        }, 3000);
+    }
+
+    // Añadir estilos CSS para animaciones
+    if (!document.querySelector('#animaciones-css')) {
+        const estiloAnimaciones = document.createElement('style');
+        estiloAnimaciones.id = 'animaciones-css';
+        estiloAnimaciones.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
             }
-        }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(estiloAnimaciones);
+    }
 
-        function cerrarModal() {
-            document.getElementById('modalDetalles').style.display = 'none';
-        }
-
-        // Recargar libros cada 30 segundos para ver cambios del administrador
-        setInterval(cargarLibros, 30000);
+    // Volver al inicio
+    function volverInicio() {
+        window.location.href = '/';  // O la ruta que uses para volver
+    }
+</script>
     </script>
 </body>
 </html>

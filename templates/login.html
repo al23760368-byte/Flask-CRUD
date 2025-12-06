@@ -81,9 +81,11 @@
             👨‍💼 Administrador
         </button>
         
-        <button class="btn-main btn-alumno" onclick="mostrarAlumno()">
-            🎓 Alumno
-        </button>
+        <a href={{url_for('auth.reglog')}}>
+            <button  class="btn-main btn-alumno">
+                🎓 Alumno
+            </button>
+        </a>
     </div>
 
     <script>

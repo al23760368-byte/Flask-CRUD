@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Autenticación - Mi Biblioteca</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 1200px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+        
+        .header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .tabs {
+            display: flex;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+            padding: 5px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .tab {
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .tab.active {
+            background-color: white;
+            color: #2575fc;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .form-container {
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            transition: all 0.3s ease;
+        }
+        
+        .form {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .form.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .form h2 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 1.8rem;
+            text-align: center;
+        }
+        
+        .input-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        .input-group input:focus {
+            border-color: #2575fc;
+            outline: none;
+        }
+        
+        .input-group i {
+            position: absolute;
+            right: 15px;
+            top: 45px;
+            color: #888;
+        }
+        
+        .btn {
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: white;
+            border: none;
+            padding: 16px;
+            width: 100%;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 15px rgba(37, 117, 252, 0.3);
+        }
+        
+        .password-toggle {
+            cursor: pointer;
+        }
+        
+        @media (max-width: 600px) {
+            .form-container {
+                padding: 30px 20px;
+            }
+            
+            .header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .tab {
+                padding: 12px 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Mi Biblioteca</h1>
+            <p>Accede a tu cuenta o crea una nueva</p>
+        </div>
+        
+        <div class="tabs">
+            <a href="#" class="tab active" id="login-tab">Iniciar Sesión</a>
+            <a href="#" class="tab" id="register-tab">Registrarse</a>
+        </div>
+        
+        <div class="form-container">
+            <!-- Formulario de Inicio de Sesión -->
+            <form action="/auth/login" method="post" class="form active" id="login-form">
+                <h2>Iniciar Sesión</h2>
+                
+                <div class="input-group">
+                    <label for="login-user">Usuario</label>
+                    <input name="usuario" type="text" id="login-user" placeholder="Tu usuario" required>
+                    <i class="fas fa-envelope"></i>
+                </div>
+                
+                <div class="input-group">
+                    <label for="login-password">Contraseña</label>
+                    <input name="contrasena" type="password" id="login-password" placeholder="Introduce tu contraseña" required>
+                    <i class="fas fa-lock password-toggle" id="login-password-toggle"></i>
+                </div>
+                
+                <button type="submit" class="btn">Iniciar Sesión</button>
+            </form>
+
+            {% with mensajes = get_flashed_messages(with_categories=True) %}
+                {% if mensajes %}
+                    {% for categoria, mensaje in mensajes %}
+                    <div class="alert alert-{{ categoria }}">
+                        {{ mensaje }}
+                    </div>
+                    {% endfor %}
+                {% endif %}
+                {% endwith %}
+            
+            <!-- Formulario de Registro -->
+            <form action="/auth/register" method="post" class="form" id="register-form">
+                <h2>Crear una Cuenta</h2>
+                
+                <div class="input-group">
+                    <label for="register-user">Usuario</label>
+                    <input name="usuario" type="text" id="register-user" placeholder="bananito123" required>
+                    <i class="fas fa-envelope"></i>
+                </div>
+                
+                <div class="input-group">
+                    <label for="register-password">Contraseña</label>
+                    <input name="contrasena"  type="password" id="register-password" placeholder="Crea una contraseña segura" required>
+                    <i class="fas fa-lock password-toggle" id="register-password-toggle"></i>
+                </div>
+                
+                <button type="submit" class="btn">Crear Cuenta</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Cambio entre formularios de inicio de sesión y registro
+        const loginTab = document.getElementById('login-tab');
+        const registerTab = document.getElementById('register-tab');
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        
+        // Mostrar formulario de inicio de sesión
+        function showLoginForm() {
+            loginTab.classList.add('active');
+            registerTab.classList.remove('active');
+            loginForm.classList.add('active');
+            registerForm.classList.remove('active');
+        }
+        
+        // Mostrar formulario de registro
+        function showRegisterForm() {
+            loginTab.classList.remove('active');
+            registerTab.classList.add('active');
+            loginForm.classList.remove('active');
+            registerForm.classList.add('active');
+        }
+        
+        // Event listeners para las pestañas
+        loginTab.addEventListener('click', function(e) {
+            e.preventDefault();
+            showLoginForm();
+        });
+        
+        registerTab.addEventListener('click', function(e) {
+            e.preventDefault();
+            showRegisterForm();
+        });
+        
+        // Funcionalidad para mostrar/ocultar contraseña
+        const loginPasswordToggle = document.getElementById('login-password-toggle');
+        const registerPasswordToggle = document.getElementById('register-password-toggle');
+        const loginPasswordInput = document.getElementById('login-password');
+        const registerPasswordInput = document.getElementById('register-password');
+        
+        loginPasswordToggle.addEventListener('click', function() {
+            const type = loginPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            loginPasswordInput.setAttribute('type', type);
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+        });
+        
+        registerPasswordToggle.addEventListener('click', function() {
+            const type = registerPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            registerPasswordInput.setAttribute('type', type);
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+        });
+               
+    </script>
+</body>
+</html>
